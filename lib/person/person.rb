@@ -62,7 +62,7 @@ class Person
 		@location = params.fetch(:location)
 
 		# logs #
-		@@statDropLog = false
+		@@statDropLog = false # Print Drop ticks
 
 		@logger = Logger.new(STDERR)
 		@logger.level = Logger::DEBUG
