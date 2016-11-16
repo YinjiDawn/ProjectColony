@@ -36,7 +36,7 @@ class Location
 
 		# resources #
 		@inventory = Inventory.new(:owner => self, :genre => "location")
-		@inventory.add_item_to_inventory("food", Item.new(:gameTimer => $gameTimer, :owner => self, :name => "meat", :amount => 0), 5)
+		@inventory.add_item_to_inventory("food", Item.new(:gameTimer => $gameTimer, :owner => self, :name => "meat", :amount => 0), 0)
 		@inventory.add_item_to_inventory("food", Item.new(:gameTimer => $gameTimer, :owner => self, :name => "fruit", :amount => 0), 10)
 		# @inventory.add_item_to_inventory("food", Food.new(:gameTimer => $gameTimer, :owner => self, :name => "wood", :amount => 0), 10)
 	end
@@ -64,6 +64,13 @@ class Location
 
 	def food
 		return @food
+	end
+
+	def isInventoryItemZero(genre, item)
+		#p @inventory.inventory[genre][item].amount
+		amount = @inventory.inventory[genre][item].amount
+		return true if amount.zero?
+		return false
 	end
 
 	## location settings ##

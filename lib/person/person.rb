@@ -61,6 +61,9 @@ class Person
 		# location #
 		@location = params.fetch(:location)
 
+		# logs #
+		@@statDropLog = false
+
 		@logger = Logger.new(STDERR)
 		@logger.level = Logger::DEBUG
 		@logger.progname = "Person[#{@name}]"
@@ -146,6 +149,7 @@ class Person
 		## inventory food amount check #
 		@inventory.inventory["food"].each do |foodName, item|
 			if item.amount.zero?
+				next if @location.isInventoryItemZero("food", foodName) ## Person has insight on the amount of resources in location // Won't waste time & energy on an empty resource
 				collectMin = @skills["collect"][foodName]["min"]
 				collectMax = @skills["collect"][foodName]["max"]
 				actionOnLocation("collect", "food", foodName, "increase", rand(collectMin..collectMax))
@@ -177,7 +181,7 @@ class Person
 		dropRate = drop["rate"]
 		dropAmount = drop["amount"]
 		if @@dropTimer[stat] + dropRate <= @gameTimer.currentTime 
-			statChange(self, "decrease", stat, dropAmount, "dropTick", true)
+			statChange(self, "decrease", stat, dropAmount, "dropTick", @@statDropLog)
 			return true
 		else
 			return false
@@ -239,14 +243,16 @@ class Person
 	end
 
 	def actionOnSelf(action, item)
-		actionCost = @skills[action][item]["actionCost"]
-		if checkEnergyForAction(item, actionCost)
-			minGain = @skills[action][item]["min"]
-			maxGain = @skills[action][item]["max"]
-			recoveryType = @skills[action][item]["recoveryType"]
-			case item
-			when "sleep"
-				statChange(self, "increase", recoveryType, rand(minGain..maxGain), item)
+		if actionTime(action, item)
+			actionCost = @skills[action][item]["actionCost"]
+			if checkEnergyForAction(item, actionCost)
+				minGain = @skills[action][item]["min"]
+				maxGain = @skills[action][item]["max"]
+				recoveryType = @skills[action][item]["recoveryType"]
+				case item
+				when "sleep"
+					statChange(self, "increase", recoveryType, rand(minGain..maxGain), item)
+				end
 			end
 		end
 	end
@@ -259,8 +265,6 @@ class Person
 				when "food"
 					case type
 					when "increase" ## increase inventory with genre[item] by requestedAmount
-						#sleep 30
-						#@logger.info "#{@name} Took 5 seconds to collect #{item}"
 						receivedAmount = @location.statChange(self, "decrease", genre, item, requestedAmount, action)	
 						if !receivedAmount.zero?
 							@logger.debug "used #{actionCost} energy and has #{@energy} energy left due to #{action}" if statChange(self, "decrease", "energy", actionCost, action)

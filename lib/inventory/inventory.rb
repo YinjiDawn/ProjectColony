@@ -14,12 +14,11 @@ class Inventory
 		@item_config = YAML.load_file("./lib/item/item_config.yaml")
 
 		# stats #
-		@inventory = @config["inventory"][@genre]
+		@inventory = @config["inventory"][@genre] # {"food"=>{}}
 		# initialize inventory items ##
 		@item_config["Item"].keys.each do |itemName|
 			add_item_to_inventory("food", Item.new(:gameTimer => $gameTimer, :owner => @owner, :name => itemName, :amount => 0), 0)
 		end
-
 
 		@logger = Logger.new(STDERR)
 		@logger.level = Logger::DEBUG
