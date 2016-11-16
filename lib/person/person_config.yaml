@@ -1,0 +1,30 @@
+person: 
+  stats:
+    maxhealth: 100
+    maxenergy: 100
+  skills:
+    collect:
+      meat:
+        min: 1 
+        max: 2
+        actionCost: 4
+        actionTime: 5
+      fruit:
+        min: 1
+        max: 4
+        actionCost: 2
+        actionTime: 5
+    rest:
+      sleep:
+        min: 5
+        max: 15
+        actionCost: 0
+        actionTime: 5
+        recoveryType: energy
+  drops:
+    health:
+      rate: 1
+      amount: 1
+    # energy:
+    #   rate: 1
+    #   amount: 1

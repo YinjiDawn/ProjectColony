@@ -1,0 +1,5 @@
+inventory: 
+  person:
+    food: {}
+  location:
+    food: {}

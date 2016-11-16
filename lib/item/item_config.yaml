@@ -1,0 +1,10 @@
+Item: {
+	meat: {
+    recoveryType: "health",
+    recoveryAmount: 10,
+  },
+  fruit: {
+    recoveryType: "health",
+    recoveryAmount: 5
+  }
+}

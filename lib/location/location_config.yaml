@@ -1,0 +1,14 @@
+location:
+  default:
+    amount:
+      food:
+        meat: 5
+        fruit: 10
+  regens:
+    food:
+      meat:
+        regenRate: 25
+        regenAmount: 1
+      fruit:
+        regenRate: 15
+        regenAmount: 2
