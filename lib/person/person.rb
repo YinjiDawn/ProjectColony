@@ -293,7 +293,7 @@ class Person
 					maxGain = @skills[action][item]["max"]
 					recoveryType = @skills[action][item]["recoveryType"]
 					receivedAmount = rand(minGain..maxGain)
-					case typeasdasdsd
+					case type
 					when "sleep"
 						statChange(self, "increase", recoveryType, receivedAmount, item)
 						@@randDropEnergyNumber = rand(@@minRand..@@maxRand)
