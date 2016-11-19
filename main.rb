@@ -10,6 +10,7 @@ require 'logger'
 def main
 	$location.run
 	$person.run
+	#$person2.run
 end
 
 def init
@@ -22,7 +23,7 @@ def init
 
 	
 	$location = Location.new(:gameTimer => $gameTimer, :name => "Grassland")
-	$person = Person.new(:gameTimer => $gameTimer, :name => "Henry", :location => $location, :health => 100, :energy => 100)
+	$person = Person.new(:gameTimer => $gameTimer, :name => "Henry", :location => $location, :health => 100, :energy => 50)
 	#$person2 = Person.new(:gameTimer => $gameTimer, :name => "Bob", :location => $location, :health => 100, :energy => 100)
 end
 

@@ -13,6 +13,9 @@ class Location
 		@config = YAML.load_file("./lib/location/location_config.yaml")
 		@is_running = false
 		@status = true
+
+		# defaults #
+
 		
 		# regens #
 		@regens = @config["location"]["regens"]
@@ -36,7 +39,7 @@ class Location
 
 		# resources #
 		@inventory = Inventory.new(:owner => self, :genre => "location")
-		@inventory.add_item_to_inventory("food", Item.new(:gameTimer => $gameTimer, :owner => self, :name => "meat", :amount => 0), 0)
+		@inventory.add_item_to_inventory("food", Item.new(:gameTimer => $gameTimer, :owner => self, :name => "meat", :amount => 0), 5)
 		@inventory.add_item_to_inventory("food", Item.new(:gameTimer => $gameTimer, :owner => self, :name => "fruit", :amount => 0), 10)
 		# @inventory.add_item_to_inventory("food", Food.new(:gameTimer => $gameTimer, :owner => self, :name => "wood", :amount => 0), 10)
 	end

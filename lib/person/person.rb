@@ -21,6 +21,7 @@ class Person
 		@name = params.fetch(:name)
 		@inventory = Inventory.new(:owner => self, :genre => "person")
 		@@isDoingAction = false
+		@@currentAction = {"action" => nil, "item" => nil}
 
 		# @inventory.add_item_to_inventory("food", Item.new(:gameTimer => $gameTimer, :owner => self, :name => "meat", :amount => 0), 1) ##default
 		# @inventory.add_item_to_inventory("food", Item.new(:gameTimer => $gameTimer, :owner => self, :name => "fruit", :amount => 0), 1) ##default
@@ -62,7 +63,7 @@ class Person
 		@location = params.fetch(:location)
 
 		# logs #
-		@@statDropLog = false # Print Drop ticks
+		@@statDropLog = true # Print Drop ticks
 
 		@logger = Logger.new(STDERR)
 		@logger.level = Logger::DEBUG
@@ -126,15 +127,18 @@ class Person
 	def checkEnergyNeeds
 		# energy check #
 		if @energy < @@randDropEnergyNumber
-			@@randDropEnergyNumber = rand(@@minRand..@@maxRand)
-			actionOnSelf("rest", "sleep")
+		# if @energy < 60
+			# @@randDropEnergyNumber = rand(@@minRand..@@maxRand)
+			return false if !(@@currentAction["action"] == "rest" and @@currentAction["item"] == "sleep") and !(@@currentAction["action"].nil? and @@currentAction["item"].nil?)
+			#actionOnSelf("rest", "sleep")
+			actionOnLocation("rest", "rest", "sleep", "sleep", 0)
 		end
 	end
 
 	def checkFoodNeeds
 		# health check #
 		if @health < @randDropFoodNumber
-			@randDropFoodNumber = rand(@@minRand..@@maxRand)
+			# @randDropFoodNumber = rand(@@minRand..@@maxRand)
 			consumed = false
 			@inventory.inventory["food"].keys.each do |foodName|
 				next if @inventory.inventory["food"][foodName].amount <= 0
@@ -152,8 +156,11 @@ class Person
 				next if @location.isInventoryItemZero("food", foodName) ## Person has insight on the amount of resources in location // Won't waste time & energy on an empty resource
 				collectMin = @skills["collect"][foodName]["min"]
 				collectMax = @skills["collect"][foodName]["max"]
+				# p @@currentAction
+				# next if (((@@currentAction["action"] == "collect" and @@currentAction["item"] == item) or (@@currentAction["action"].nil? and @@currentAction["item"].nil?)) and @@isDoingAction)
+				next if !(@@currentAction["action"] == "collect" and @@currentAction["item"] == foodName) and !(@@currentAction["action"].nil? and @@currentAction["item"].nil?)
 				actionOnLocation("collect", "food", foodName, "increase", rand(collectMin..collectMax))
-				break if @@isDoingAction
+				# break if @@isDoingAction
 			end
 		end
 	end
@@ -161,7 +168,9 @@ class Person
 	## person settings ##
 
 	def actionTime(action, item)
-		@@isDoingAction = true
+		# @@isDoingAction = true
+		@@currentAction["action"] = action
+		@@currentAction["item"] = item
 		if !@@currentActionTimeStatus[action][item]
 			@@currentActionTimeStatus[action][item] = true
 			@@currentActionTime[action][item] = @gameTimer.currentTime 
@@ -170,7 +179,9 @@ class Person
 		if @@currentActionTime[action][item] + @skills[action][item]["actionTime"] <= @gameTimer.currentTime 
 			@@currentActionTimeStatus[action][item] = false
 			@logger.info "#{action} #{item} took #{@skills[action][item]["actionTime"]} seconds."
-			@@isDoingAction = false
+			#@@isDoingAction = false
+			@@currentAction["action"] = nil
+			@@currentAction["item"] = nil
 			return true
 		else
 			return false
@@ -233,17 +244,20 @@ class Person
 
 	## person actions ##
 	def consume(genre, item, item_obj, amount_consume)
+		# p @inventory.inventory["food"][item].amount
 		case genre
 		when "food"
 			inventoryChangeResult = item_obj.statChange(self, "decrease", "amount", amount_consume, "consume")
 			statChange(self, "increase", item_obj.instance_variable_get(:@recoveryType), item_obj.instance_variable_get(:@recoveryAmount), "consume")
+			@randDropFoodNumber = rand(@@minRand..@@maxRand)
 			return inventoryChangeResult
 		end
 		# @logger.debug "Inventory[#{@name}] consumed #{amount_consume} #{genre}[#{item}]. Amount left = #{food_obj.instance_variable_get(:@amount)}"
 	end
 
 	def actionOnSelf(action, item)
-		if actionTime(action, item)
+		#@@isDoingAction = true
+		if actionTime(action, item) #and !@@isDoingAction
 			actionCost = @skills[action][item]["actionCost"]
 			if checkEnergyForAction(item, actionCost)
 				minGain = @skills[action][item]["min"]
@@ -258,7 +272,8 @@ class Person
 	end
 
 	def actionOnLocation(action, genre, item, type, requestedAmount)
-		if actionTime(action, item)
+		#@@isDoingAction = true
+		if actionTime(action, item) #and !@@isDoingAction
 			actionCost = @skills[action][item]["actionCost"]
 			if checkEnergyForAction(action, actionCost)
 				case genre
@@ -272,6 +287,16 @@ class Person
 						else
 							return 0
 						end
+					end
+				when "rest"
+					minGain = @skills[action][item]["min"]
+					maxGain = @skills[action][item]["max"]
+					recoveryType = @skills[action][item]["recoveryType"]
+					receivedAmount = rand(minGain..maxGain)
+					case typeasdasdsd
+					when "sleep"
+						statChange(self, "increase", recoveryType, receivedAmount, item)
+						@@randDropEnergyNumber = rand(@@minRand..@@maxRand)
 					end
 				end
 				@logger.debug "#{type} #{genre}[#{item}] amount = #{receivedAmount}"
